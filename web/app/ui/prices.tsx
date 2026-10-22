@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const REALTIME_URL =
   process.env.NEXT_PUBLIC_REALTIME_URL ?? "ws://localhost:8080";
-  
+
 type PricesMessage = {
   type: "prices";
   seq: number;
