@@ -15,25 +15,26 @@ export default function Summary() {
         : "text-gray-900";
 
   return (
-    <section className="border-b border-gray-200 bg-white">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-end gap-x-12 gap-y-4 px-6 py-6">
-        <div>
-          <div className="text-sm text-gray-600">Portfolio value</div>
-          <div className="text-4xl font-bold tabular-nums">
-            {formatUsd(valueCents)}
-          </div>
+    <section
+      aria-label="Account summary"
+      className="flex flex-wrap items-end gap-x-12 gap-y-4 pb-4 pt-5"
+    >
+      <div>
+        <div className="text-sm text-gray-600">Portfolio value</div>
+        <div className="text-4xl font-bold tabular-nums">
+          {formatUsd(valueCents)}
         </div>
-        <div>
-          <div className="text-sm text-gray-600">Cash</div>
-          <div className="text-2xl font-semibold tabular-nums">
-            {formatUsd(account.cashCents)}
-          </div>
+      </div>
+      <div>
+        <div className="text-sm text-gray-600">Cash</div>
+        <div className="text-2xl font-semibold tabular-nums">
+          {formatUsd(account.cashCents)}
         </div>
-        <div>
-          <div className="text-sm text-gray-600">Total gain</div>
-          <div className={`text-2xl font-semibold tabular-nums ${gainColor}`}>
-            {formatGain(gainCents)}
-          </div>
+      </div>
+      <div>
+        <div className="text-sm text-gray-600">Total gain</div>
+        <div className={`text-2xl font-semibold tabular-nums ${gainColor}`}>
+          {formatGain(gainCents)}
         </div>
       </div>
     </section>

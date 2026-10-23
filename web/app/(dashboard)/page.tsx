@@ -1,5 +1,5 @@
-import Prices from "@/app/(dashboard)/ui/prices";
+import Market from "@/app/(dashboard)/ui/market";
 
 export default function MarketPage() {
-  return <Prices />;
+  return <Market />;
 }
