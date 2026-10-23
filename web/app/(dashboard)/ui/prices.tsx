@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatUsd } from "@/lib/format";
 
 const REALTIME_URL =
   process.env.NEXT_PUBLIC_REALTIME_URL ?? "ws://localhost:8080";
@@ -11,11 +12,6 @@ type PricesMessage = {
   ts: number;
   prices: Record<string, number>; // symbol -> price in cents
 };
-
-const usd = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "USD",
-});
 
 export default function Prices() {
   const [latest, setLatest] = useState<PricesMessage | null>(null);
@@ -59,9 +55,7 @@ export default function Prices() {
             <th scope="row" className="py-2 font-medium">
               {symbol}
             </th>
-            <td className="py-2 text-right tabular-nums">
-              {usd.format(cents / 100)}
-            </td>
+            <td className="py-2 text-right tabular-nums">{formatUsd(cents)}</td>
           </tr>
         ))}
       </tbody>
