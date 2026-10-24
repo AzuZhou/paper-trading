@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   buy,
   createAccount,
+  holdingsValueCents,
   STARTING_CASH_CENTS,
   sell,
-  holdingsValueCents,
 } from "./account";
 
 describe("buy", () => {

@@ -13,7 +13,7 @@ export default function Market() {
         <Prices selected={selected} onSelect={setSelected} />
       </div>
       <div className="lg:flex-2">
-        <TradePanel symbol={selected} />
+        <TradePanel key={selected ?? "none"} symbol={selected} />
       </div>
     </div>
   );

@@ -1,18 +1,34 @@
-import { createAccount, STARTING_CASH_CENTS } from "@/lib/account";
+"use client";
+
+import { useAccount } from "@/app/(dashboard)/providers/account-provider";
+import { usePrices } from "@/app/(dashboard)/providers/prices-provider";
+import {
+  createAccount,
+  holdingsValueCents,
+  STARTING_CASH_CENTS,
+} from "@/lib/account";
 import { formatGain, formatUsd } from "@/lib/format";
 
 export default function Summary() {
-  // Placeholder until lib/api.ts exists: a brand-new account, nothing stored yet.
-  const account = createAccount();
-  const valueCents = account.cashCents; // no holdings yet
-  const gainCents = valueCents - STARTING_CASH_CENTS;
+  const { account: saved } = useAccount();
+  const prices = usePrices();
+
+  // Until the saved account loads, show a brand-new one.
+  const account = saved ?? createAccount();
+
+  // null when we hold shares but don't have their live prices yet.
+  const holdingsCents = holdingsValueCents(account, prices?.prices ?? {});
+  const valueCents =
+    holdingsCents === null ? null : account.cashCents + holdingsCents;
+  const gainCents =
+    valueCents === null ? null : valueCents - STARTING_CASH_CENTS;
 
   const gainColor =
-    gainCents > 0
-      ? "text-emerald-700"
-      : gainCents < 0
-        ? "text-red-700"
-        : "text-gray-900";
+    gainCents === null || gainCents === 0
+      ? "text-gray-900"
+      : gainCents > 0
+        ? "text-emerald-700"
+        : "text-red-700";
 
   return (
     <section
@@ -22,7 +38,7 @@ export default function Summary() {
       <div>
         <div className="text-sm text-gray-600">Portfolio value</div>
         <div className="text-4xl font-bold tabular-nums">
-          {formatUsd(valueCents)}
+          {valueCents === null ? "—" : formatUsd(valueCents)}
         </div>
       </div>
       <div>
@@ -34,7 +50,7 @@ export default function Summary() {
       <div>
         <div className="text-sm text-gray-600">Total gain</div>
         <div className={`text-2xl font-semibold tabular-nums ${gainColor}`}>
-          {formatGain(gainCents)}
+          {gainCents === null ? "—" : formatGain(gainCents)}
         </div>
       </div>
     </section>
