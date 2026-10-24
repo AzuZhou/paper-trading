@@ -95,3 +95,18 @@ export function sell(
     },
   };
 }
+
+// What all held shares are worth at the given prices (in cents).
+// Returns null if we hold a symbol that has no price yet.
+export function holdingsValueCents(
+  account: Account,
+  prices: Record<string, number>,
+): number | null {
+  let total = 0;
+  for (const [symbol, shares] of Object.entries(account.holdings)) {
+    const price = prices[symbol];
+    if (price === undefined) return null;
+    total += shares * price;
+  }
+  return total;
+}

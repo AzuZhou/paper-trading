@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buy, createAccount, STARTING_CASH_CENTS, sell } from "./account";
+import {
+  buy,
+  createAccount,
+  STARTING_CASH_CENTS,
+  sell,
+  holdingsValueCents,
+} from "./account";
 
 describe("buy", () => {
   it("takes the exact cost from cash and adds the shares", () => {
@@ -57,5 +63,23 @@ describe("sell", () => {
     if (!bought.ok) throw new Error("buy should work");
     const result = sell(bought.account, "AAPL", 10, 18940);
     expect(result.ok && result.account.holdings).toEqual({});
+  });
+});
+
+describe("holdingsValueCents", () => {
+  it("adds up shares times current price", () => {
+    const bought = buy(createAccount(), "AAPL", 10, 18940);
+    if (!bought.ok) throw new Error("setup failed");
+    expect(holdingsValueCents(bought.account, { AAPL: 19120 })).toBe(191200);
+  });
+
+  it("is 0 with no holdings", () => {
+    expect(holdingsValueCents(createAccount(), {})).toBe(0);
+  });
+
+  it("is null when a price is missing", () => {
+    const bought = buy(createAccount(), "AAPL", 10, 18940);
+    if (!bought.ok) throw new Error("setup failed");
+    expect(holdingsValueCents(bought.account, {})).toBeNull();
   });
 });
