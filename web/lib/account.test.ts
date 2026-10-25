@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  type Account,
   buy,
+  costBasisCents,
   createAccount,
   holdingsValueCents,
   STARTING_CASH_CENTS,
   sell,
+  type TradeResult,
 } from "./account";
 
 describe("buy", () => {
@@ -81,5 +84,34 @@ describe("holdingsValueCents", () => {
     const bought = buy(createAccount(), "AAPL", 10, 18940);
     if (!bought.ok) throw new Error("setup failed");
     expect(holdingsValueCents(bought.account, {})).toBeNull();
+  });
+});
+
+function must(result: TradeResult): Account {
+  if (!result.ok) throw new Error(result.error);
+  return result.account;
+}
+
+describe("costBasisCents", () => {
+  it("adds up what you paid for the shares you hold", () => {
+    let account = createAccount();
+    account = must(buy(account, "AAPL", 10, 10000));
+    account = must(buy(account, "AAPL", 10, 20000));
+    expect(costBasisCents(account, "AAPL")).toBe(300000);
+  });
+
+  it("removes sold shares at their average cost", () => {
+    let account = createAccount();
+    account = must(buy(account, "AAPL", 10, 10000));
+    account = must(buy(account, "AAPL", 10, 20000));
+    account = must(sell(account, "AAPL", 10, 30000));
+    expect(costBasisCents(account, "AAPL")).toBe(150000);
+  });
+
+  it("is 0 after selling everything", () => {
+    let account = createAccount();
+    account = must(buy(account, "AAPL", 10, 10000));
+    account = must(sell(account, "AAPL", 10, 12000));
+    expect(costBasisCents(account, "AAPL")).toBe(0);
   });
 });

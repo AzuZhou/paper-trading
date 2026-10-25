@@ -110,3 +110,21 @@ export function holdingsValueCents(
   }
   return total;
 }
+
+// What you paid for the shares of `symbol` you still hold (in cents).
+// A sale removes shares at their average cost.
+export function costBasisCents(account: Account, symbol: string): number {
+  let shares = 0;
+  let cost = 0;
+  for (const trade of account.trades) {
+    if (trade.symbol !== symbol) continue;
+    if (trade.side === "buy") {
+      shares += trade.quantity;
+      cost += trade.quantity * trade.priceCents;
+    } else {
+      cost -= (cost / shares) * trade.quantity;
+      shares -= trade.quantity;
+    }
+  }
+  return Math.round(cost);
+}
