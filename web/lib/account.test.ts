@@ -5,6 +5,7 @@ import {
   costBasisCents,
   createAccount,
   holdingsValueCents,
+  positionGainCents,
   STARTING_CASH_CENTS,
   sell,
   type TradeResult,
@@ -113,5 +114,24 @@ describe("costBasisCents", () => {
     account = must(buy(account, "AAPL", 10, 10000));
     account = must(sell(account, "AAPL", 10, 12000));
     expect(costBasisCents(account, "AAPL")).toBe(0);
+  });
+});
+
+describe("positionGainCents", () => {
+  it("is value now minus what you paid", () => {
+    let account = createAccount();
+    account = must(buy(account, "AAPL", 5, 10000));
+    account = must(buy(account, "AAPL", 2, 13000));
+    // paid 76000 for 7 shares, now worth 7 * 12000 = 84000
+    expect(positionGainCents(account, "AAPL", 12000)).toBe(8000);
+  });
+
+  it("is negative when the price fell", () => {
+    const account = must(buy(createAccount(), "AAPL", 10, 10000));
+    expect(positionGainCents(account, "AAPL", 9000)).toBe(-10000);
+  });
+
+  it("is 0 for a stock you don't hold", () => {
+    expect(positionGainCents(createAccount(), "AAPL", 12000)).toBe(0);
   });
 });

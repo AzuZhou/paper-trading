@@ -128,3 +128,13 @@ export function costBasisCents(account: Account, symbol: string): number {
   }
   return Math.round(cost);
 }
+
+// Gain or loss on the shares of `symbol` you hold, at the given price (in cents).
+export function positionGainCents(
+  account: Account,
+  symbol: string,
+  priceCents: number,
+): number {
+  const shares = account.holdings[symbol] ?? 0;
+  return shares * priceCents - costBasisCents(account, symbol);
+}
