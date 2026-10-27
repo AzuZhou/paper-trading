@@ -33,7 +33,7 @@ export default function Summary() {
   return (
     <section
       aria-label="Account summary"
-      className="flex flex-wrap items-end gap-x-6 gap-y-1 pb-4 pt-4 lg:gap-x-12 lg:gap-y-4 lg:pt-5"
+      className="flex flex-wrap items-end gap-x-6 gap-y-2 pb-4 pt-4 lg:gap-x-12 lg:pt-5"
     >
       <div className="w-full lg:w-auto">
         <div className="text-xs text-gray-600 lg:text-sm">Portfolio value</div>
@@ -41,18 +41,20 @@ export default function Summary() {
           {valueCents === null ? "—" : formatUsd(valueCents)}
         </div>
       </div>
-      <div>
-        <div className="text-xs text-gray-600 lg:text-sm">Cash</div>
-        <div className="text-base font-semibold tabular-nums lg:text-2xl">
-          {formatUsd(account.cashCents)}
+      <div className="flex w-full gap-6 lg:w-auto lg:gap-12">
+        <div>
+          <div className="text-xs text-gray-600 lg:text-sm">Cash</div>
+          <div className="text-base font-semibold tabular-nums lg:text-2xl">
+            {formatUsd(account.cashCents)}
+          </div>
         </div>
-      </div>
-      <div>
-        <div className="text-xs text-gray-600 lg:text-sm">Total gain</div>
-        <div
-          className={`text-base font-semibold tabular-nums lg:text-2xl ${gainColor}`}
-        >
-          {gainCents === null ? "—" : formatGain(gainCents)}
+        <div>
+          <div className="text-xs text-gray-600 lg:text-sm">Total gain</div>
+          <div
+            className={`text-base font-semibold tabular-nums lg:text-2xl ${gainColor}`}
+          >
+            {gainCents === null ? "—" : formatGain(gainCents)}
+          </div>
         </div>
       </div>
     </section>

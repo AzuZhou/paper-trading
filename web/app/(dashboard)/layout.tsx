@@ -14,13 +14,13 @@ export default function DashboardLayout({
       <AccountProvider>
         <div className="min-h-screen bg-gray-50">
           <div className="border-b border-gray-200 bg-white">
-            <div className="mx-auto max-w-5xl px-6">
+            <div className="mx-auto max-w-5xl px-4 lg:px-6">
               <TopBar />
               <Summary />
               <Nav />
             </div>
           </div>
-          <main className="mx-auto max-w-5xl px-4 py-4 lg:px-6 lg:py-6">
+          <main className="mx-auto max-w-5xl py-4 lg:px-6 lg:py-6">
             {children}
           </main>
         </div>

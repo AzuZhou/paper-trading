@@ -12,7 +12,7 @@ export default function Prices({ selected, onSelect }: Props) {
   const latest = usePrices();
 
   return (
-    <section className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <section className="overflow-hidden border-y border-gray-200 bg-white lg:rounded-xl lg:border">
       <div className="flex items-center justify-between p-4">
         <h2 className="text-base font-semibold">Market</h2>
         <span

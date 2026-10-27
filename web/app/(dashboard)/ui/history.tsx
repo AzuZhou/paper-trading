@@ -18,7 +18,7 @@ export default function History() {
     .reverse();
 
   return (
-    <section className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <section className="overflow-hidden border-y border-gray-200 bg-white lg:rounded-xl lg:border">
       <h2 className="p-4 text-base font-semibold">Trade history</h2>
       {rows.length === 0 ? (
         <p className="border-t border-gray-200 p-4 text-sm text-gray-600">
