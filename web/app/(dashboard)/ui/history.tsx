@@ -43,7 +43,10 @@ export default function History() {
                 <th scope="col" className="px-4 py-2.5 text-right font-medium">
                   Shares
                 </th>
-                <th scope="col" className="px-4 py-2.5 text-right font-medium">
+                <th
+                  scope="col"
+                  className="hidden px-4 py-2.5 text-right font-medium sm:table-cell"
+                >
                   Price
                 </th>
                 <th scope="col" className="px-4 py-2.5 text-right font-medium">
@@ -74,7 +77,7 @@ export default function History() {
                   <td className="px-4 py-3 text-right tabular-nums">
                     {trade.quantity}
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums">
+                  <td className="hidden px-4 py-3 text-right tabular-nums sm:table-cell">
                     {formatUsd(trade.priceCents)}
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums">

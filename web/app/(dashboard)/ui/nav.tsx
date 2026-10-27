@@ -21,7 +21,7 @@ export default function Nav() {
             key={tab.href}
             href={tab.href}
             aria-current={active ? "page" : undefined}
-            className={`border-b-2 px-4 py-3 text-sm font-medium ${
+            className={`flex-1 border-b-2 px-4 py-3 text-center text-sm font-medium lg:flex-none ${
               active
                 ? "border-blue-600 text-blue-700"
                 : "border-transparent text-gray-600 hover:text-gray-900"

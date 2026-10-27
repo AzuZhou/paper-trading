@@ -39,7 +39,10 @@ export default function Portfolio() {
                 <th scope="col" className="px-4 py-2.5 text-right font-medium">
                   Shares
                 </th>
-                <th scope="col" className="px-4 py-2.5 text-right font-medium">
+                <th
+                  scope="col"
+                  className="hidden px-4 py-2.5 text-right font-medium sm:table-cell"
+                >
                   Price
                 </th>
                 <th scope="col" className="px-4 py-2.5 text-right font-medium">
@@ -79,7 +82,7 @@ export default function Portfolio() {
                     <td className="px-4 py-3 text-right tabular-nums">
                       {shares}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">
+                    <td className="hidden px-4 py-3 text-right tabular-nums sm:table-cell">
                       {price === undefined ? "—" : formatUsd(price)}
                     </td>
                     <td className="px-4 py-3 text-right tabular-nums">
