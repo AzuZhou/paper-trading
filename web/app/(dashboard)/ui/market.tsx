@@ -8,12 +8,21 @@ export default function Market() {
   const [selected, setSelected] = useState<string | null>(null);
 
   return (
-    <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+    <div
+      className={`flex flex-col gap-6 lg:flex-row lg:items-start ${
+        selected ? "pb-96 lg:pb-0" : ""
+      }`}
+    >
       <div className="min-w-0 lg:flex-3">
-        <Prices selected={selected} onSelect={setSelected} />
+        <Prices
+          selected={selected}
+          onSelect={(symbol) =>
+            setSelected(symbol === selected ? null : symbol)
+          }
+        />
       </div>
       <div className="lg:flex-2">
-        <TradePanel key={selected ?? "none"} symbol={selected} />
+        <TradePanel symbol={selected} onClose={() => setSelected(null)} />
       </div>
     </div>
   );
