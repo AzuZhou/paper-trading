@@ -13,12 +13,15 @@ type PricesMessage = {
 };
 
 const PricesContext = createContext<PricesMessage | null>(null);
+const DisconnectedContext = createContext(false);
 
 export function PricesProvider({ children }: { children: React.ReactNode }) {
   const [latest, setLatest] = useState<PricesMessage | null>(null);
+  const [disconnected, setDisconnected] = useState(false);
 
   useEffect(() => {
     const socket = new WebSocket(REALTIME_URL);
+    socket.onopen = () => setDisconnected(false);
     socket.onmessage = (event) => {
       const message: PricesMessage = JSON.parse(event.data);
       // Ignore anything older than what is already shown.
@@ -27,15 +30,28 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
         current && message.seq <= current.seq ? current : message,
       );
     };
-    return () => socket.close();
+    socket.onclose = () => setDisconnected(true);
+    return () => {
+      socket.onclose = null; // closing on purpose is not a disconnect
+      socket.close();
+    };
   }, []);
 
   return (
-    <PricesContext.Provider value={latest}>{children}</PricesContext.Provider>
+    <PricesContext.Provider value={latest}>
+      <DisconnectedContext.Provider value={disconnected}>
+        {children}
+      </DisconnectedContext.Provider>
+    </PricesContext.Provider>
   );
 }
 
 // The latest prices message, or null until the first one arrives.
 export function usePrices(): PricesMessage | null {
   return useContext(PricesContext);
+}
+
+// True once the connection has closed, for example when the server sleeps.
+export function useDisconnected(): boolean {
+  return useContext(DisconnectedContext);
 }

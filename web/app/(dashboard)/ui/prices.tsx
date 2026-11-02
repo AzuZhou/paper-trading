@@ -1,6 +1,9 @@
 "use client";
 
-import { usePrices } from "@/app/(dashboard)/providers/prices-provider";
+import {
+  useDisconnected,
+  usePrices,
+} from "@/app/(dashboard)/providers/prices-provider";
 import { formatUsd } from "@/lib/format";
 
 type Props = {
@@ -10,21 +13,30 @@ type Props = {
 
 export default function Prices({ selected, onSelect }: Props) {
   const latest = usePrices();
+  const disconnected = useDisconnected();
+
+  const status = disconnected ? "Disconnected" : latest ? "Live" : "Connecting";
+  const statusStyle = disconnected
+    ? "bg-red-50 text-red-700"
+    : latest
+      ? "bg-emerald-50 text-emerald-800"
+      : "bg-gray-100 text-gray-700";
 
   return (
     <section className="overflow-hidden border-y border-gray-200 bg-white lg:rounded-xl lg:border">
       <div className="flex items-center justify-between p-4">
         <h2 className="text-base font-semibold">Market</h2>
         <span
-          className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-            latest
-              ? "bg-emerald-50 text-emerald-800"
-              : "bg-gray-100 text-gray-700"
-          }`}
+          className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusStyle}`}
         >
-          {latest ? "Live" : "Connecting"}
+          {status}
         </span>
       </div>
+      {disconnected && (
+        <p role="status" className="px-4 pb-3 text-sm text-gray-600">
+          The price connection closed. Refresh the page to reconnect.
+        </p>
+      )}
       {latest && (
         <table className="w-full border-collapse text-sm">
           <caption className="sr-only">Simulated prices</caption>
