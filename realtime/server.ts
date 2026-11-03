@@ -14,9 +14,6 @@ let prices: Prices = {
   NVDA: 13075,
 };
 
-// TODO: seq restarts at 0 when this service restarts. When the browser gets
-// auto-reconnect, reset its saved seq on each new connection. Otherwise it
-// ignores messages until seq catches up.
 let seq = 0; // goes up by 1 with every message
 let latest = ""; // the last message we sent, as text
 

@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  useDisconnected,
   usePrices,
+  useReconnecting,
 } from "@/app/(dashboard)/providers/prices-provider";
 import { formatUsd } from "@/lib/format";
 
@@ -13,11 +13,11 @@ type Props = {
 
 export default function Prices({ selected, onSelect }: Props) {
   const latest = usePrices();
-  const disconnected = useDisconnected();
+  const reconnecting = useReconnecting();
 
-  const status = disconnected ? "Disconnected" : latest ? "Live" : "Connecting";
-  const statusStyle = disconnected
-    ? "bg-red-50 text-red-700"
+  const status = reconnecting ? "Reconnecting" : latest ? "Live" : "Connecting";
+  const statusStyle = reconnecting
+    ? "bg-amber-50 text-amber-800"
     : latest
       ? "bg-emerald-50 text-emerald-800"
       : "bg-gray-100 text-gray-700";
@@ -32,9 +32,10 @@ export default function Prices({ selected, onSelect }: Props) {
           {status}
         </span>
       </div>
-      {disconnected && (
+      {reconnecting && (
         <p role="status" className="px-4 pb-3 text-sm text-gray-600">
-          The price connection closed. Refresh the page to reconnect.
+          The price connection closed. Trying to reconnect. The server can take
+          up to a minute to wake up.
         </p>
       )}
       {latest && (
