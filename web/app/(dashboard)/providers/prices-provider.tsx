@@ -32,9 +32,7 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
       socket = new WebSocket(REALTIME_URL);
 
       socket.onopen = () => {
-        retryMs = FIRST_RETRY_MS;
         lastSeq = -1; // a new connection may be a restarted server
-        setReconnecting(false);
       };
 
       socket.onmessage = (event) => {
@@ -42,10 +40,16 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
         // Ignore anything older than what this connection already showed.
         if (message.seq <= lastSeq) return;
         lastSeq = message.seq;
+        // A message proves the connection is healthy. A server that accepts
+        // and then closes right away (for example when it is full) never
+        // gets here, so the state stays steady and the delay keeps growing.
+        retryMs = FIRST_RETRY_MS;
+        setReconnecting(false);
         setLatest(message);
       };
 
       socket.onclose = () => {
+        setLatest(null);
         setReconnecting(true);
         timer = window.setTimeout(connect, retryMs);
         retryMs = Math.min(retryMs * 2, MAX_RETRY_MS);
