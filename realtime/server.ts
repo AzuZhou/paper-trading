@@ -3,6 +3,9 @@ import { nextPrices, type Prices } from "./prices.ts";
 
 const PORT = Number(process.env.PORT ?? 8080);
 const TICK_MS = 1000;
+const MAX_CLIENTS = 100; // memory is limited on the free plan
+const MAX_BUFFERED_BYTES = 64 * 1024; // a client this far behind is skipped
+const MAX_INCOMING_BYTES = 1024; // browsers never need to send us much
 
 // Temporary: symbols live in code until storage is decided. Prices in cents.
 let prices: Prices = {
@@ -24,7 +27,12 @@ function tick() {
   seq += 1;
   latest = JSON.stringify({ type: "prices", seq, ts: Date.now(), prices });
   for (const client of wss.clients) {
-    if (client.readyState === WebSocket.OPEN) client.send(latest);
+    // A slow connection would make the server queue every tick in memory.
+    // Prices are "latest wins", so skipping a tick for that client is fine.
+    const canReceive =
+      client.readyState === WebSocket.OPEN &&
+      client.bufferedAmount <= MAX_BUFFERED_BYTES;
+    if (canReceive) client.send(latest);
   }
 }
 
@@ -33,6 +41,10 @@ setInterval(tick, TICK_MS);
 
 wss.on("connection", (socket) => {
   socket.on("error", console.error);
+  if (wss.clients.size > MAX_CLIENTS) {
+    socket.close(1013, "Server is full, try again later");
+    return;
+  }
   socket.send(latest); // new clients get the current prices immediately
 });
 
