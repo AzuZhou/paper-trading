@@ -20,7 +20,7 @@ let prices: Prices = {
 let seq = 0; // goes up by 1 with every message
 let latest = ""; // the last message we sent, as text
 
-const wss = new WebSocketServer({ port: PORT });
+const wss = new WebSocketServer({ port: PORT, maxPayload: MAX_INCOMING_BYTES });
 
 function tick() {
   prices = nextPrices(prices);
