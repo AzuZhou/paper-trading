@@ -1,10 +1,26 @@
 "use client";
 
 import {
+  type ConnectionStatus,
+  useConnectionContext,
   usePrices,
-  useReconnecting,
 } from "@/app/(dashboard)/providers/prices-provider";
 import { formatUsd } from "@/lib/format";
+
+const BADGES: Record<ConnectionStatus, { text: string; style: string }> = {
+  connecting: { text: "Connecting", style: "bg-gray-100 text-gray-700" },
+  live: { text: "Live", style: "bg-emerald-50 text-emerald-800" },
+  reconnecting: { text: "Reconnecting", style: "bg-amber-50 text-amber-800" },
+  unavailable: { text: "Unavailable", style: "bg-red-50 text-red-700" },
+};
+
+const MESSAGES: Record<Exclude<ConnectionStatus, "live">, string> = {
+  connecting:
+    "Connecting to the price server. If it was asleep, this can take up to a minute.",
+  reconnecting:
+    "The price connection closed. Trying to reconnect. The server can take up to a minute to wake up.",
+  unavailable: "Can't reach the price server. Still trying.",
+};
 
 type Props = {
   selected: string | null;
@@ -13,29 +29,22 @@ type Props = {
 
 export default function Prices({ selected, onSelect }: Props) {
   const latest = usePrices();
-  const reconnecting = useReconnecting();
-
-  const status = reconnecting ? "Reconnecting" : latest ? "Live" : "Connecting";
-  const statusStyle = reconnecting
-    ? "bg-amber-50 text-amber-800"
-    : latest
-      ? "bg-emerald-50 text-emerald-800"
-      : "bg-gray-100 text-gray-700";
+  const status = useConnectionContext() ?? "connecting";
+  const badge = BADGES[status];
 
   return (
     <section className="overflow-hidden border-y border-gray-200 bg-white lg:rounded-xl lg:border">
       <div className="flex items-center justify-between p-4">
         <h2 className="text-base font-semibold">Market</h2>
         <span
-          className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusStyle}`}
+          className={`rounded-full px-2.5 py-1 text-xs font-medium ${badge.style}`}
         >
-          {status}
+          {badge.text}
         </span>
       </div>
-      {reconnecting && (
+      {status !== "live" && (
         <p role="status" className="px-4 pb-3 text-sm text-gray-600">
-          The price connection closed. Trying to reconnect. The server can take
-          up to a minute to wake up.
+          {MESSAGES[status]}
         </p>
       )}
       {latest && (

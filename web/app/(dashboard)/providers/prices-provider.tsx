@@ -15,12 +15,19 @@ type PricesMessage = {
   prices: Record<string, number>; // symbol -> price in cents
 };
 
+export type ConnectionStatus =
+  | "connecting"
+  | "live"
+  | "reconnecting"
+  | "unavailable";
+
 const PricesContext = createContext<PricesMessage | null>(null);
-const ReconnectingContext = createContext(false);
+const ConnectionContext = createContext<ConnectionStatus>("connecting");
 
 export function PricesProvider({ children }: { children: React.ReactNode }) {
   const [latest, setLatest] = useState<PricesMessage | null>(null);
-  const [reconnecting, setReconnecting] = useState(false);
+  const [connectionStatus, setConnnectionStatus] =
+    useState<ConnectionStatus>("connecting");
 
   useEffect(() => {
     let socket: WebSocket | undefined;
@@ -44,13 +51,15 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
         // and then closes right away (for example when it is full) never
         // gets here, so the state stays steady and the delay keeps growing.
         retryMs = FIRST_RETRY_MS;
-        setReconnecting(false);
+        setConnnectionStatus("live");
         setLatest(message);
       };
 
       socket.onclose = () => {
         setLatest(null);
-        setReconnecting(true);
+        setConnnectionStatus((current) =>
+          current === "live" ? "reconnecting" : current,
+        );
         timer = window.setTimeout(connect, retryMs);
         retryMs = Math.min(retryMs * 2, MAX_RETRY_MS);
       };
@@ -69,9 +78,9 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <PricesContext.Provider value={latest}>
-      <ReconnectingContext.Provider value={reconnecting}>
+      <ConnectionContext.Provider value={connectionStatus}>
         {children}
-      </ReconnectingContext.Provider>
+      </ConnectionContext.Provider>
     </PricesContext.Provider>
   );
 }
@@ -82,6 +91,6 @@ export function usePrices(): PricesMessage | null {
 }
 
 // True while the connection is closed and we are trying again.
-export function useReconnecting(): boolean {
-  return useContext(ReconnectingContext);
+export function useConnectionContext(): ConnectionStatus {
+  return useContext(ConnectionContext);
 }
