@@ -5,7 +5,10 @@ import {
   useConnectionContext,
   usePrices,
 } from "@/app/(dashboard)/providers/prices-provider";
+import Skeleton from "@/app/(dashboard)/ui/skeleton";
 import { formatUsd } from "@/lib/format";
+
+const SKELETON_ROWS = ["a", "b", "c", "d", "e", "f"];
 
 const BADGES: Record<ConnectionStatus, { text: string; style: string }> = {
   connecting: { text: "Connecting", style: "bg-gray-100 text-gray-700" },
@@ -47,7 +50,7 @@ export default function Prices({ selected, onSelect }: Props) {
           {MESSAGES[status]}
         </p>
       )}
-      {latest && (
+      {status !== "unavailable" && (
         <table className="w-full border-collapse text-sm">
           <caption className="sr-only">Simulated prices</caption>
           <thead>
@@ -61,7 +64,7 @@ export default function Prices({ selected, onSelect }: Props) {
             </tr>
           </thead>
           <tbody>
-            {Object.entries(latest.prices).map(([symbol, cents]) => {
+            {Object.entries(latest?.prices || {}).map(([symbol, cents]) => {
               const isSelected = symbol === selected;
               return (
                 <tr
@@ -86,6 +89,21 @@ export default function Prices({ selected, onSelect }: Props) {
                 </tr>
               );
             })}
+            {!latest &&
+              SKELETON_ROWS.map((key) => (
+                <tr
+                  key={key}
+                  aria-hidden="true"
+                  className="border-b border-gray-100 last:border-b-0"
+                >
+                  <td className="h-12 px-4">
+                    <Skeleton className="h-4 w-18" />
+                  </td>
+                  <td className="h-12 px-4">
+                    <Skeleton className="ml-auto h-4 w-18" />
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       )}
