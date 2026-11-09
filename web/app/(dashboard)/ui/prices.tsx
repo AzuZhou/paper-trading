@@ -46,9 +46,9 @@ export default function Prices({ selected, onSelect }: Props) {
         </span>
       </div>
       {status !== "live" && (
-        <p role="status" className="px-4 pb-3 text-sm text-gray-600">
+        <output className="block px-4 pb-3 text-sm text-gray-600">
           {MESSAGES[status]}
-        </p>
+        </output>
       )}
       {status !== "unavailable" && (
         <table className="w-full border-collapse text-sm">
@@ -93,7 +93,6 @@ export default function Prices({ selected, onSelect }: Props) {
               SKELETON_ROWS.map((key) => (
                 <tr
                   key={key}
-                  aria-hidden="true"
                   className="border-b border-gray-100 last:border-b-0"
                 >
                   <td className="h-12 px-4">
