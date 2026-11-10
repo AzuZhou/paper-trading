@@ -1,19 +1,13 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import type { PricesMessage } from "@/lib/prices-message";
 
 const REALTIME_URL =
   process.env.NEXT_PUBLIC_REALTIME_URL ?? "ws://localhost:8080";
 
 const FIRST_RETRY_MS = 1000;
 const MAX_RETRY_MS = 10_000;
-
-type PricesMessage = {
-  type: "prices";
-  seq: number;
-  ts: number;
-  prices: Record<string, number>; // symbol -> price in cents
-};
 
 export type ConnectionStatus =
   | "connecting"
