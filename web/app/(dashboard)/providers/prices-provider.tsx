@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import type { PricesMessage } from "@/lib/prices-message";
+import { isValidPricesMessage, type PricesMessage } from "@/lib/prices-message";
 
 const REALTIME_URL =
   process.env.NEXT_PUBLIC_REALTIME_URL ?? "ws://localhost:8080";
@@ -37,7 +37,13 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
       };
 
       socket.onmessage = (event) => {
-        const message: PricesMessage = JSON.parse(event.data);
+        let message: unknown;
+        try {
+          message = JSON.parse(event.data);
+        } catch {
+          return; // not JSON, ignore it
+        }
+        if (!isValidPricesMessage(message)) return;
         // Ignore anything older than what this connection already showed.
         if (message.seq <= lastSeq) return;
         lastSeq = message.seq;
