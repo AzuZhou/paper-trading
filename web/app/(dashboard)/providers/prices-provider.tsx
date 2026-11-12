@@ -20,7 +20,7 @@ const ConnectionContext = createContext<ConnectionStatus>("connecting");
 
 export function PricesProvider({ children }: { children: React.ReactNode }) {
   const [latest, setLatest] = useState<PricesMessage | null>(null);
-  const [connectionStatus, setConnnectionStatus] =
+  const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
 
   useEffect(() => {
@@ -51,13 +51,13 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
         // and then closes right away (for example when it is full) never
         // gets here, so the state stays steady and the delay keeps growing.
         retryMs = FIRST_RETRY_MS;
-        setConnnectionStatus("live");
+        setConnectionStatus("live");
         setLatest(message);
       };
 
       socket.onclose = () => {
         setLatest(null);
-        setConnnectionStatus((current) =>
+        setConnectionStatus((current) =>
           current === "live" ? "reconnecting" : current,
         );
         timer = window.setTimeout(connect, retryMs);
