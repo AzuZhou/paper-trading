@@ -22,7 +22,7 @@ const MESSAGES: Record<Exclude<ConnectionStatus, "live">, string> = {
     "Connecting to the price server. If it was asleep, this can take up to a minute.",
   reconnecting:
     "The price connection closed. Trying to reconnect. The server can take up to a minute to wake up.",
-  unavailable: "Can't reach the price server. Still trying.",
+  unavailable: "Something isn't working. Please try again later.",
 };
 
 type Props = {

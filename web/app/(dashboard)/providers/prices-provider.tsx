@@ -8,6 +8,7 @@ const REALTIME_URL =
 
 const FIRST_RETRY_MS = 1000;
 const MAX_RETRY_MS = 10_000;
+const GIVE_UP_MS = 2 * 60 * 1000;
 
 export type ConnectionStatus =
   | "connecting"
@@ -26,6 +27,7 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let socket: WebSocket | undefined;
     let timer: number | undefined;
+    let giveUpTimer: number | undefined;
     let retryMs = FIRST_RETRY_MS;
     let lastSeq = -1;
 
@@ -50,6 +52,7 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
         // A message proves the connection is healthy. A server that accepts
         // and then closes right away (for example when it is full) never
         // gets here, so the state stays steady and the delay keeps growing.
+        window.clearTimeout(giveUpTimer);
         retryMs = FIRST_RETRY_MS;
         setConnectionStatus("live");
         setLatest(message);
@@ -67,7 +70,18 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
 
     connect();
 
+    giveUpTimer = window.setTimeout(() => {
+      window.clearTimeout(timer);
+
+      if (socket) {
+        socket.onclose = null; // closing on purpose is not a disconnect
+        socket.close();
+      }
+      setConnectionStatus("unavailable");
+    }, GIVE_UP_MS);
+
     return () => {
+      window.clearTimeout(giveUpTimer);
       window.clearTimeout(timer);
       if (socket) {
         socket.onclose = null; // closing on purpose is not a disconnect
