@@ -26,10 +26,32 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let socket: WebSocket | undefined;
-    let timer: number | undefined;
+    let retryTimer: number | undefined;
     let giveUpTimer: number | undefined;
     let retryMs = FIRST_RETRY_MS;
     let lastSeq = -1;
+
+    const giveUp = () => {
+      window.clearTimeout(retryTimer);
+
+      if (socket) {
+        socket.onclose = null; // closing on purpose is not a disconnect
+        socket.close();
+      }
+      setConnectionStatus("unavailable");
+    };
+
+    const startGiveUpTimer = () => {
+      // starts the countdown and saves the id in the variable
+      if (giveUpTimer) return; // already running
+      giveUpTimer = window.setTimeout(giveUp, GIVE_UP_MS);
+    };
+
+    const stopGiveUpTimer = () => {
+      // cancels the countdown and empties the variable
+      window.clearTimeout(giveUpTimer);
+      giveUpTimer = undefined;
+    };
 
     const connect = () => {
       socket = new WebSocket(REALTIME_URL);
@@ -52,7 +74,7 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
         // A message proves the connection is healthy. A server that accepts
         // and then closes right away (for example when it is full) never
         // gets here, so the state stays steady and the delay keeps growing.
-        window.clearTimeout(giveUpTimer);
+        stopGiveUpTimer();
         retryMs = FIRST_RETRY_MS;
         setConnectionStatus("live");
         setLatest(message);
@@ -63,26 +85,18 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
         setConnectionStatus((current) =>
           current === "live" ? "reconnecting" : current,
         );
-        timer = window.setTimeout(connect, retryMs);
+        startGiveUpTimer(); // this must always be the reconnecting case
+        retryTimer = window.setTimeout(connect, retryMs);
         retryMs = Math.min(retryMs * 2, MAX_RETRY_MS);
       };
     };
 
     connect();
-
-    giveUpTimer = window.setTimeout(() => {
-      window.clearTimeout(timer);
-
-      if (socket) {
-        socket.onclose = null; // closing on purpose is not a disconnect
-        socket.close();
-      }
-      setConnectionStatus("unavailable");
-    }, GIVE_UP_MS);
+    startGiveUpTimer();
 
     return () => {
       window.clearTimeout(giveUpTimer);
-      window.clearTimeout(timer);
+      window.clearTimeout(retryTimer);
       if (socket) {
         socket.onclose = null; // closing on purpose is not a disconnect
         socket.close();
