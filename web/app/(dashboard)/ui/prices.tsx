@@ -18,11 +18,9 @@ const BADGES: Record<ConnectionStatus, { text: string; style: string }> = {
 };
 
 const MESSAGES: Record<Exclude<ConnectionStatus, "live">, string> = {
-  connecting:
-    "Connecting to the price server. If it was asleep, this can take up to a minute.",
-  reconnecting:
-    "The price connection closed. Trying to reconnect. The server can take up to a minute to wake up.",
-  unavailable: "Something isn't working. Please try again later.",
+  connecting: "Connecting to the server. This can take up to a minute.",
+  reconnecting: "Connection lost. Trying to reconnect.",
+  unavailable: "Something isn't working. Refresh the page, or try again later.",
 };
 
 type Props = {
