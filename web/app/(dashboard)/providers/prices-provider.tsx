@@ -9,6 +9,7 @@ const REALTIME_URL =
 const FIRST_RETRY_MS = 1000;
 const MAX_RETRY_MS = 10_000;
 const GIVE_UP_MS = 2 * 60 * 1000;
+const SILENCE_MS = 5_000;
 
 export type ConnectionStatus =
   | "connecting"
@@ -28,11 +29,13 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
     let socket: WebSocket | undefined;
     let retryTimer: number | undefined;
     let giveUpTimer: number | undefined;
+    let silenceTimer: number | undefined;
     let retryMs = FIRST_RETRY_MS;
     let lastSeq = -1;
 
     const giveUp = () => {
       window.clearTimeout(retryTimer);
+      window.clearTimeout(silenceTimer);
 
       if (socket) {
         socket.onclose = null; // closing on purpose is not a disconnect
@@ -53,11 +56,36 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
       giveUpTimer = undefined;
     };
 
+    const startSilenceTimer = () => {
+      window.clearTimeout(silenceTimer);
+
+      silenceTimer = window.setTimeout(() => {
+        if (socket) {
+          socket.onclose = null;
+          socket.close();
+        }
+        handleDisconnect();
+      }, SILENCE_MS);
+    };
+
+    const handleDisconnect = () => {
+      clearTimeout(silenceTimer);
+      setLatest(null);
+      setConnectionStatus((current) =>
+        current === "live" ? "reconnecting" : current,
+      );
+      startGiveUpTimer();
+      retryTimer = window.setTimeout(connect, retryMs);
+      retryMs = Math.min(retryMs * 2, MAX_RETRY_MS);
+    };
+
     const connect = () => {
       socket = new WebSocket(REALTIME_URL);
 
       socket.onopen = () => {
         lastSeq = -1; // a new connection may be a restarted server
+
+        startSilenceTimer();
       };
 
       socket.onmessage = (event) => {
@@ -74,6 +102,7 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
         // A message proves the connection is healthy. A server that accepts
         // and then closes right away (for example when it is full) never
         // gets here, so the state stays steady and the delay keeps growing.
+        startSilenceTimer();
         stopGiveUpTimer();
         retryMs = FIRST_RETRY_MS;
         setConnectionStatus("live");
@@ -81,13 +110,7 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
       };
 
       socket.onclose = () => {
-        setLatest(null);
-        setConnectionStatus((current) =>
-          current === "live" ? "reconnecting" : current,
-        );
-        startGiveUpTimer(); // this must always be the reconnecting case
-        retryTimer = window.setTimeout(connect, retryMs);
-        retryMs = Math.min(retryMs * 2, MAX_RETRY_MS);
+        handleDisconnect();
       };
     };
 
@@ -97,6 +120,7 @@ export function PricesProvider({ children }: { children: React.ReactNode }) {
     return () => {
       window.clearTimeout(giveUpTimer);
       window.clearTimeout(retryTimer);
+      window.clearTimeout(silenceTimer);
       if (socket) {
         socket.onclose = null; // closing on purpose is not a disconnect
         socket.close();
@@ -118,7 +142,6 @@ export function usePrices(): PricesMessage | null {
   return useContext(PricesContext);
 }
 
-// True while the connection is closed and we are trying again.
 export function useConnectionContext(): ConnectionStatus {
   return useContext(ConnectionContext);
 }
