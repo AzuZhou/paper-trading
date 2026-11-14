@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useConnectionContext } from "@/app/(dashboard)/providers/prices-provider";
 import Prices from "@/app/(dashboard)/ui/prices";
 import TradePanel from "@/app/(dashboard)/ui/trade-panel";
 
 export default function Market() {
   const [selected, setSelected] = useState<string | null>(null);
+  const status = useConnectionContext();
+
+  useEffect(() => {
+    if (status !== "live") setSelected(null);
+  }, [status]);
 
   return (
     <div
@@ -22,7 +28,9 @@ export default function Market() {
         />
       </div>
       <div className="lg:flex-2">
-        <TradePanel symbol={selected} onClose={() => setSelected(null)} />
+        {status === "live" && (
+          <TradePanel symbol={selected} onClose={() => setSelected(null)} />
+        )}
       </div>
     </div>
   );

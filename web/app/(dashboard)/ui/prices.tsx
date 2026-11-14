@@ -30,7 +30,7 @@ type Props = {
 
 export default function Prices({ selected, onSelect }: Props) {
   const latest = usePrices();
-  const status = useConnectionContext() ?? "connecting";
+  const status = useConnectionContext();
   const badge = BADGES[status];
 
   return (
