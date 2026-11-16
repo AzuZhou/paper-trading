@@ -1,4 +1,4 @@
-import { isValidPricesMessage, type PricesMessage } from "@/lib/prices-message";
+import { isValidPricesMessage, type PricesMessage } from "./prices-message";
 
 const REALTIME_URL =
   process.env.NEXT_PUBLIC_REALTIME_URL ?? "ws://localhost:8080";
