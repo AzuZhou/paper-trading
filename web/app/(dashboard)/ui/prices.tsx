@@ -67,8 +67,8 @@ export default function Prices({ selected, onSelect }: Props) {
               return (
                 <tr
                   key={symbol}
-                  className={`border-b border-gray-100 last:border-b-0 ${
-                    isSelected ? "bg-blue-50" : ""
+                  className={`relative border-b border-gray-100 last:border-b-0 ${
+                    isSelected ? "bg-blue-50" : "hover:bg-gray-50"
                   }`}
                 >
                   <th scope="row" className="px-4 text-left">
@@ -76,7 +76,7 @@ export default function Prices({ selected, onSelect }: Props) {
                       type="button"
                       aria-pressed={isSelected}
                       onClick={() => onSelect(symbol)}
-                      className="h-12 font-semibold"
+                      className="h-12 cursor-pointer font-semibold after:absolute after:inset-0"
                     >
                       {symbol}
                     </button>
