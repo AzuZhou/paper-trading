@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  type ConnectionStatus,
   useConnectionContext,
   usePrices,
 } from "@/app/(dashboard)/providers/prices-provider";
 import Skeleton from "@/app/(dashboard)/ui/skeleton";
 import { formatUsd } from "@/lib/format";
+import type { ConnectionStatus } from "@/lib/price-connection";
 
 const SKELETON_ROWS = ["a", "b", "c", "d", "e", "f"];
 
