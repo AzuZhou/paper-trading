@@ -3,7 +3,6 @@ import { isValidPricesMessage } from "./prices-message";
 
 const valid = {
   type: "prices",
-  seq: 1,
   ts: 1_700_000_000_000,
   prices: { AAPL: 18940, MSFT: 41250 },
 };
@@ -18,9 +17,8 @@ test("rejects values that are not objects", () => {
   expect(isValidPricesMessage(42)).toBe(false);
 });
 
-test("rejects a wrong type or a seq that is not a number", () => {
+test("rejects a wrong type", () => {
   expect(isValidPricesMessage({ ...valid, type: "other" })).toBe(false);
-  expect(isValidPricesMessage({ ...valid, seq: "1" })).toBe(false);
 });
 
 test("rejects prices that are missing, empty or an array", () => {

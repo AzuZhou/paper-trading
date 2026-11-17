@@ -29,7 +29,6 @@ export const createPriceConnection = ({
   let giveUpTimer: number | undefined;
   let silenceTimer: number | undefined;
   let retryMs = FIRST_RETRY_MS;
-  let lastSeq = -1;
 
   const setStatus = (nextStatus: ConnectionStatus) => {
     status = nextStatus;
@@ -73,7 +72,7 @@ export const createPriceConnection = ({
   };
 
   const handleDisconnect = () => {
-    clearTimeout(silenceTimer);
+    window.clearTimeout(silenceTimer);
     setLatest(null);
     if (status === "live") setStatus("reconnecting");
     startGiveUpTimer();
@@ -85,8 +84,6 @@ export const createPriceConnection = ({
     socket = new WebSocket(REALTIME_URL);
 
     socket.onopen = () => {
-      lastSeq = -1; // a new connection may be a restarted server
-
       startSilenceTimer();
     };
 
@@ -98,9 +95,6 @@ export const createPriceConnection = ({
         return; // not JSON, ignore it
       }
       if (!isValidPricesMessage(message)) return;
-      // Ignore anything older than what this connection already showed.
-      if (message.seq <= lastSeq) return;
-      lastSeq = message.seq;
       // A message proves the connection is healthy. A server that accepts
       // and then closes right away (for example when it is full) never
       // gets here, so the state stays steady and the delay keeps growing.

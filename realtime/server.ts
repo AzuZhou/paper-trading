@@ -17,15 +17,13 @@ let prices: Prices = {
   NVDA: 13075,
 };
 
-let seq = 0; // goes up by 1 with every message
 let latest = ""; // the last message we sent, as text
 
 const wss = new WebSocketServer({ port: PORT, maxPayload: MAX_INCOMING_BYTES });
 
 function tick() {
   prices = nextPrices(prices);
-  seq += 1;
-  latest = JSON.stringify({ type: "prices", seq, ts: Date.now(), prices });
+  latest = JSON.stringify({ type: "prices", ts: Date.now(), prices });
   for (const client of wss.clients) {
     // A slow connection would make the server queue every tick in memory.
     // Prices are "latest wins", so skipping a tick for that client is fine.

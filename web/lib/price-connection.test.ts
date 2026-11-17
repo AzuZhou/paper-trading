@@ -24,7 +24,7 @@ class FakeSocket {
   }
 }
 
-const message = { type: "prices", seq: 1, ts: 0, prices: { AAPL: 18940 } };
+const message = { type: "prices", ts: 0, prices: { AAPL: 18940 } };
 
 describe("createPriceConnection", () => {
   beforeEach(() => {
