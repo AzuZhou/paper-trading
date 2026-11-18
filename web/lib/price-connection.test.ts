@@ -56,4 +56,51 @@ describe("createPriceConnection", () => {
 
     connection.stop();
   });
+
+  it("stays live past two minutes while messages keep arriving", () => {
+    const setConnectionStatus = vi.fn();
+    const setLatest = vi.fn();
+    const connection = createPriceConnection({
+      setConnectionStatus,
+      setLatest,
+    });
+
+    const socket = FakeSocket.instances[0];
+    socket.open();
+    socket.receive(message);
+
+    for (let second = 0; second < 130; second++) {
+      vi.advanceTimersByTime(1000);
+      socket.receive(message);
+    }
+
+    expect(setConnectionStatus).not.toHaveBeenCalledWith("reconnecting");
+    expect(setConnectionStatus).not.toHaveBeenCalledWith("unavailable");
+    expect(setConnectionStatus).toHaveBeenLastCalledWith("live");
+
+    connection.stop();
+  });
+
+  it("goes reconnecting after 5 seconds of silence", () => {
+    const setConnectionStatus = vi.fn();
+    const setLatest = vi.fn();
+    const connection = createPriceConnection({
+      setConnectionStatus,
+      setLatest,
+    });
+
+    const socket = FakeSocket.instances[0];
+    socket.open();
+    socket.receive(message);
+
+    vi.advanceTimersByTime(4900);
+    expect(setConnectionStatus).not.toHaveBeenCalledWith("reconnecting");
+
+    vi.advanceTimersByTime(100);
+    expect(socket.closed).toBe(true);
+    expect(setConnectionStatus).toHaveBeenLastCalledWith("reconnecting");
+    expect(setLatest).toHaveBeenLastCalledWith(null);
+
+    connection.stop();
+  });
 });
