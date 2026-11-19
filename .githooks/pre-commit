@@ -1,0 +1,4 @@
+#!/bin/sh
+
+(cd web && npm run lint && npm test) || exit 1
+(cd realtime && npm run lint && npm test) || exit 1fv
