@@ -5,10 +5,12 @@ import {
   buy,
   costBasisCents,
   createAccount,
+  holdingsFromTrades,
   holdingsValueCents,
   positionGainCents,
   STARTING_CASH_CENTS,
   sell,
+  type Trade,
   type TradeResult,
 } from "./account";
 
@@ -134,5 +136,24 @@ describe("positionGainCents", () => {
 
   it("is 0 for a stock you don't hold", () => {
     expect(positionGainCents(createAccount(), "AAPL", 12000)).toBe(0);
+  });
+});
+
+describe("holdingsFromTrades", () => {
+  it("adds up buys and subtracts sells per symbol", () => {
+    const trades: Trade[] = [
+      { side: "buy", symbol: "AAPL", quantity: 5, priceCents: 100 },
+      { side: "buy", symbol: "MSFT", quantity: 2, priceCents: 100 },
+      { side: "sell", symbol: "AAPL", quantity: 2, priceCents: 100 },
+    ];
+    expect(holdingsFromTrades(trades)).toEqual({ AAPL: 3, MSFT: 2 });
+  });
+
+  it("drops a symbol once it is sold out", () => {
+    const trades: Trade[] = [
+      { side: "buy", symbol: "AAPL", quantity: 5, priceCents: 100 },
+      { side: "sell", symbol: "AAPL", quantity: 5, priceCents: 100 },
+    ];
+    expect(holdingsFromTrades(trades)).toEqual({});
   });
 });

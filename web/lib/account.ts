@@ -138,3 +138,21 @@ export function positionGainCents(
   const shares = account.holdings[symbol] ?? 0;
   return shares * priceCents - costBasisCents(account, symbol);
 }
+
+export function holdingsFromTrades(trades: Trade[]): Record<string, number> {
+  const holdings: Record<string, number> = {};
+
+  for (const { side, symbol, quantity } of trades) {
+    const owned =
+      (holdings[symbol] ?? 0) + (side === "buy" ? quantity : -quantity);
+
+    if (owned === 0) {
+      delete holdings[symbol];
+      holdings[symbol];
+    } else {
+      holdings[symbol] = owned;
+    }
+  }
+
+  return holdings;
+}
