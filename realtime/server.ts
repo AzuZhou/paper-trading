@@ -1,3 +1,4 @@
+import { createServer } from "node:http";
 import { WebSocket, WebSocketServer } from "ws";
 import { nextPrices, type Prices } from "./prices.ts";
 
@@ -19,7 +20,23 @@ let prices: Prices = {
 
 let latest = ""; // the last message we sent, as text
 
-const wss = new WebSocketServer({ port: PORT, maxPayload: MAX_INCOMING_BYTES });
+// The web server asks here for the price a trade will use.
+const server = createServer((req, res) => {
+  const url = new URL(req.url ?? "/", "http://localhost");
+  if (req.method !== "GET" || url.pathname !== "/price") {
+    res.writeHead(404).end();
+    return;
+  }
+  const symbol = url.searchParams.get("symbol") ?? "";
+  if (!Object.hasOwn(prices, symbol)) {
+    res.writeHead(404).end();
+    return;
+  }
+  res.writeHead(200, { "content-type": "application/json" });
+  res.end(JSON.stringify({ priceCents: prices[symbol] }));
+});
+
+const wss = new WebSocketServer({ server, maxPayload: MAX_INCOMING_BYTES });
 
 function tick() {
   prices = nextPrices(prices);
@@ -46,4 +63,6 @@ wss.on("connection", (socket) => {
   socket.send(latest); // new clients get the current prices immediately
 });
 
-console.log(`realtime service listening on ws://localhost:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`realtime service listening on ws://localhost:${PORT}`);
+});
